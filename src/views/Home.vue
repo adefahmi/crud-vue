@@ -16,7 +16,9 @@ export default {
         };
     }
 }
-
+console.log(import.meta.env.VITE_API_ENDPOINT);
+let user = JSON.parse(localStorage.getItem("user"));
+console.log(user);
 </script>
 
 <style>

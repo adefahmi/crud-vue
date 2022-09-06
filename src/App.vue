@@ -21,6 +21,19 @@
                     <!-- barang categories -->
                     <router-link :to="{ name: 'barang-categories'}" class="nav-link" active-class="active" >Barang Categories</router-link>
                 </li>
+                <div v-if="currentUser" class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                    <router-link to="/profile" class="nav-link">
+                        <font-awesome-icon icon="user" />
+                        {{ currentUser.username }}
+                    </router-link>
+                    </li>
+                    <li class="nav-item">
+                    <a class="nav-link" @click.prevent="logout">
+                        <font-awesome-icon icon="sign-out-alt" /> LogOut
+                    </a>
+                    </li>
+                </div>
             </ul>
         </div>
     </nav>
@@ -33,7 +46,18 @@
 <script>
 
 export default {
-    name: "app"
+    name: "app",
+    computed: {
+        currentUser() {
+            return this.$store.state.auth.user;
+        },
+    },
+    methods: {
+        logout() {
+            this.$store.dispatch('auth/logout');
+            this.$router.push({name: 'login'});
+        }
+    }
 }
 </script>
 

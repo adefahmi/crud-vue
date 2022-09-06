@@ -25,12 +25,32 @@ const routes = [
         name: "home",
         component: () => import("./views/Home.vue")
     },
+    // login
+    {
+        path: "/login",
+        name: "login",
+        component: () => import("./views/auth/Login.vue")
+    },
 
 ];
 
 const router = createRouter({
     history: createWebHistory(),
     routes,
+});
+
+router.beforeEach((to, from, next) => {
+    const publicPages = ['/login'];
+    const authRequired = !publicPages.includes(to.path);
+    const loggedIn = localStorage.getItem('user');
+
+    // trying to access a restricted page + not logged in
+    // redirect to login page
+    if (authRequired && !loggedIn) {
+        return next('/login');
+    } else {
+        next();
+    }
 });
 
 export default router;
