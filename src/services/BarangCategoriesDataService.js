@@ -3,8 +3,14 @@ import http from "../http-common";
 // class BarangCategoriesDataService 
 class BarangCategoriesDataService {
     // getAll()
-    getAll() {
-        return http.get("/barang-category");
+    getAll(name = null, perPage = null, page = null) {
+        return http.get("/barang-category", {
+            params: {
+                name,
+                perPage,
+                page
+            }
+        });
     }
     // get(id)
     get(id) {
@@ -23,8 +29,14 @@ class BarangCategoriesDataService {
         return http.delete(`/barang-category/${id}`);
     }
     // findByName(name)
-    findByName(name) {
-        return http.get(`/barang-category?name=${name}`);
+    findByName(name, perPage = null, page = null) {
+        return http.get(`/barang-category`, {
+            params: {
+                name,
+                perPage,
+                page
+            }
+        });
     }
 }
 

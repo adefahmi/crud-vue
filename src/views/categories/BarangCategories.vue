@@ -13,7 +13,7 @@
                 <div class="card-body">
                     <!-- add form -->
                     <div class="row ">
-                        <div class="form-group col">
+                        <div class="form-group col mb-3">
                             <div v-if="!barangCategory.id">
                                 <input type="text" v-model="barangCategory.name" class="form-control" @change="saveBarangCategory" placeholder="Enter name to add">
                             </div>
@@ -22,7 +22,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row mb-4">
                         <div class="col-12">
                             <!-- search -->
                             <div class="form-group">
@@ -32,25 +32,57 @@
                     </div>
                     <div class="row">
                         <div class="col">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Name</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="(item, index) in barangCategories">
-                                        <td style="width: 20px;">{{ index + 1 }}</td>
-                                        <td>{{ item.name }}</td>
-                                        <td style="width: 200px;">
-                                            <button class="btn btn-primary" @click="getBarangCategory(item.id)">Edit</button> 
+                            <div class="form-group">
+                                <label for="perPage">Per Page</label>
+                                <select v-model="perPage" class="form-control" @change="refreshList">
+                                    <option>5</option>
+                                    <option>10</option>
+                                    <option>25</option>
+                                    <option>50</option>
+                                    <option>100</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <!-- per page option -->
+                        <div class="col">
+                            <b-table-simple hover caption-top responsive id="my-table">
+                                <b-thead>
+                                    <b-tr>
+                                        <b-th>No</b-th>
+                                        <b-th>Name</b-th>
+                                        <b-th>Action</b-th>
+                                    </b-tr>
+                                </b-thead>
+                                <b-tbody>
+                                    <b-tr v-for="(item, index) in barangCategories">
+                                        <b-td style="width: 50px;">{{ index + from }}</b-td>
+                                        <b-td>{{ item.name }}</b-td>
+                                        <b-td style="width: 200px;">
+                                            <button class="btn btn-primary me-2" @click="getBarangCategory(item.id)">Edit</button> 
                                             <button class="btn btn-danger" @click="deleteBarangCategory(item.id)">Delete</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                        </b-td>
+                                    </b-tr>
+                                </b-tbody>
+                            </b-table-simple>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <b-pagination
+                                v-model="currentPage"
+                                :total-rows="total"
+                                :per-page="perPage"
+                                first-text="First"
+                                prev-text="Prev"
+                                next-text="Next"
+                                last-text="Last"
+                                @update:model-value="refreshList()"
+                            ></b-pagination>
+                        </div>
+                        <div class="col-md-4">
+                            Total Data : {{ total }} - Current Page : {{ currentPage }}
                         </div>
                     </div>
                 </div>
@@ -74,13 +106,18 @@ export default {
                 id: null,
                 name: '',
             },
+            perPage: 10,
+            currentPage: 1,
+            total: 0,
+            from: 1
         };
     },   
     methods: {
-        retriveBarangCategories() {
-            BarangCategoriesDataService.getAll().then(
+        retriveBarangCategories(name, perPage, currentPage) {
+            BarangCategoriesDataService.getAll(name, perPage, currentPage).then(
                 response => {
                     this.barangCategories = response.data.data;
+                    this.handlePageChange(response.data.pagination);    
                     console.log(response.data);
                 })
                 .catch(
@@ -91,7 +128,7 @@ export default {
         },
         // refresh list
         refreshList() {
-            this.retriveBarangCategories();
+            this.retriveBarangCategories(this.name, this.perPage, this.currentPage);
             this.currentBarangCategory = null;
             this.currentBarangCategoryIndex = -1;
         },
@@ -102,9 +139,11 @@ export default {
         },
         // search
         searchBarangCategory() {
-            BarangCategoriesDataService.findByName(this.name)
+            this.currentPage = 1;
+            BarangCategoriesDataService.findByName(this.name, this.perPage, this.currentPage)
                 .then(response => {
                     this.barangCategories = response.data.data;
+                    this.handlePageChange(response.data.pagination);
                     console.log(response.data);
                 })
                 .catch(e => {
@@ -162,9 +201,16 @@ export default {
                     console.log(e);
                 });
         },
+        // handel page
+        handlePageChange(pagination) {
+            this.perPage = Number(pagination.per_page);
+            this.currentPage = pagination.current_page;
+            this.total = pagination.total_data;
+            this.from = pagination.from;
+        },
     },
     mounted() {
-        this.retriveBarangCategories();
+        this.retriveBarangCategories(this.name, this.perPage, this.currentPage);
     } 
 }
 </script>
